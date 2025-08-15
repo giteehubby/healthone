@@ -6,7 +6,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+# dist/  # 注释掉，允许上传dist文件夹
 downloads/
 eggs/
 .eggs/
@@ -25,7 +25,7 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
+# *.spec  # 注释掉，保留spec文件
 
 # Unit test / coverage reports
 htmlcov/
