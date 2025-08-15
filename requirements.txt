@@ -1,0 +1,12 @@
+# 健康手机密码管理器依赖包
+# Core dependencies
+cryptography>=41.0.0
+
+# GUI framework (tkinter is included in Python standard library)
+# No additional GUI dependencies needed
+
+# Development and build tools (optional)
+pyinstaller>=5.13.0
+
+# Python version requirement: >=3.8
+# Note: tkinter, csv, random, string, datetime, pathlib, typing are all part of Python standard library 
