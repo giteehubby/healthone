@@ -80,9 +80,19 @@ def call_search():
     """搜索密码记录"""
     wake_text = wake_entry.get().strip()
     target_text = wake_label["text"]
+    password_name = name_entry.get().strip()
+    
+    # 检查密码名称是否为空
+    if not password_name:
+        password_display.config(state='normal')
+        password_display.delete(1.0, tk.END)
+        password_display.insert(1.0, "请在密码名称框中输入要查询的密码名称")
+        password_display.config(state='disabled')
+        status_label.config(text="✗ 请输入密码名称", fg=COLORS['accent'])
+        return
     
     if wake_text == target_text:
-        result = search(name_entry.get())
+        result = search(password_name)
         password_display.config(state='normal')
         password_display.delete(1.0, tk.END)
         password_display.insert(1.0, result)
