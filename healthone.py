@@ -121,34 +121,78 @@ def clear_all():
 # 创建主窗口
 root = tk.Tk()
 root.title("健康手机密码管理器 v2.0")
-root.geometry("600x750")
+root.geometry("600x650")  # 调整默认高度
 root.configure(bg=COLORS['background'])
 root.resizable(True, True)
+root.minsize(500, 400)  # 设置最小窗口大小
 
 # 设置窗口图标（如果有的话）
 # root.iconbitmap('icon.ico')
 
-# 创建主容器
-main_frame = tk.Frame(root, bg=COLORS['background'], padx=30, pady=20)
+# 创建主框架容器
+main_container = tk.Frame(root, bg=COLORS['background'])
+main_container.pack(fill="both", expand=True)
+
+# 创建Canvas和Scrollbar用于滚动
+canvas = tk.Canvas(main_container, bg=COLORS['background'], highlightthickness=0)
+scrollbar = tk.Scrollbar(main_container, orient="vertical", command=canvas.yview, bg=COLORS['surface'])
+scrollable_frame = tk.Frame(canvas, bg=COLORS['background'])
+
+# 配置滚动
+def configure_scroll_region(event=None):
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+scrollable_frame.bind("<Configure>", configure_scroll_region)
+
+# 创建canvas窗口
+canvas_frame = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+# 布局Canvas和Scrollbar
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+# 绑定鼠标滚轮事件
+def _on_mousewheel(event):
+    canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+def _bind_mousewheel(event):
+    canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+def _unbind_mousewheel(event):
+    canvas.unbind_all("<MouseWheel>")
+
+canvas.bind('<Enter>', _bind_mousewheel)
+canvas.bind('<Leave>', _unbind_mousewheel)
+
+# 确保canvas内容宽度适应
+def configure_canvas_width(event):
+    canvas_width = canvas.winfo_width()
+    canvas.itemconfig(canvas_frame, width=canvas_width)
+
+canvas.bind('<Configure>', configure_canvas_width)
+
+# 创建主容器（现在在scrollable_frame中）
+main_frame = tk.Frame(scrollable_frame, bg=COLORS['background'], padx=30, pady=20)
 main_frame.pack(fill='both', expand=True)
 
-# 标题区域
+# 标题区域（减少间距）
 title_frame = tk.Frame(main_frame, bg=COLORS['background'])
-title_frame.pack(fill='x', pady=(0, 30))
+title_frame.pack(fill='x', pady=(0, 15))
 
 title_label = tk.Label(title_frame, 
                       text="🔐 健康手机密码管理器", 
-                      font=('Microsoft YaHei', 20, 'bold'),
+                      font=('Microsoft YaHei', 16, 'bold'),  # 稍微减小字体
                       fg=COLORS['primary'],
                       bg=COLORS['background'])
 title_label.pack()
 
 subtitle_label = tk.Label(title_frame, 
                          text="安全生成 • 智能管理 • 健康使用", 
-                         font=('Microsoft YaHei', 10),
+                         font=('Microsoft YaHei', 9),
                          fg=COLORS['text_secondary'],
                          bg=COLORS['background'])
-subtitle_label.pack(pady=(5, 0))
+subtitle_label.pack(pady=(3, 0))
 
 # 密码生成区域
 gen_frame = tk.LabelFrame(main_frame, 
@@ -158,11 +202,11 @@ gen_frame = tk.LabelFrame(main_frame,
                          bg=COLORS['surface'],
                          relief='solid',
                          bd=1)
-gen_frame.pack(fill='x', pady=(0, 20), padx=5, ipady=15)
+gen_frame.pack(fill='x', pady=(0, 10), padx=5, ipady=10)
 
 # 密码长度输入
 length_frame = tk.Frame(gen_frame, bg=COLORS['surface'])
-length_frame.pack(fill='x', padx=20, pady=10)
+length_frame.pack(fill='x', padx=20, pady=8)
 
 length_label = tk.Label(length_frame, 
                        text="密码长度:", 
@@ -198,7 +242,7 @@ letter_check.pack(side='left')
 
 # 特殊字符输入
 special_frame = tk.Frame(gen_frame, bg=COLORS['surface'])
-special_frame.pack(fill='x', padx=20, pady=10)
+special_frame.pack(fill='x', padx=20, pady=8)
 
 special_label = tk.Label(special_frame, 
                         text="特殊字符:", 
@@ -222,7 +266,7 @@ special_entry.insert(0, "!@#$")  # 默认特殊字符
 
 # 生成按钮
 button_frame = tk.Frame(gen_frame, bg=COLORS['surface'])
-button_frame.pack(fill='x', padx=20, pady=15)
+button_frame.pack(fill='x', padx=20, pady=10)
 
 gen_button = tk.Button(button_frame, 
                       text="🎯 生成密码", 
@@ -271,7 +315,7 @@ display_frame = tk.LabelFrame(main_frame,
                              bg=COLORS['surface'],
                              relief='solid',
                              bd=1)
-display_frame.pack(fill='x', pady=(0, 20), padx=5, ipady=15)
+display_frame.pack(fill='x', pady=(0, 10), padx=5, ipady=10)
 
 password_display = tk.Text(display_frame, 
                           height=3, 
@@ -285,7 +329,7 @@ password_display = tk.Text(display_frame,
                           cursor='arrow',
                           selectbackground=COLORS['hover'],
                           selectforeground=COLORS['text_primary'])
-password_display.pack(fill='x', padx=20, pady=10)
+password_display.pack(fill='x', padx=20, pady=8)
 
 # 密码管理区域
 manage_frame = tk.LabelFrame(main_frame, 
@@ -295,11 +339,11 @@ manage_frame = tk.LabelFrame(main_frame,
                             bg=COLORS['surface'],
                             relief='solid',
                             bd=1)
-manage_frame.pack(fill='x', pady=(0, 20), padx=5, ipady=15)
+manage_frame.pack(fill='x', pady=(0, 10), padx=5, ipady=10)
 
 # 密码名称输入
 name_frame = tk.Frame(manage_frame, bg=COLORS['surface'])
-name_frame.pack(fill='x', padx=20, pady=10)
+name_frame.pack(fill='x', padx=20, pady=8)
 
 name_label = tk.Label(name_frame, 
                      text="密码名称:", 
@@ -341,11 +385,11 @@ search_frame = tk.LabelFrame(main_frame,
                             bg=COLORS['surface'],
                             relief='solid',
                             bd=1)
-search_frame.pack(fill='x', pady=(0, 20), padx=5, ipady=15)
+search_frame.pack(fill='x', pady=(0, 10), padx=5, ipady=10)
 
 # 验证提示语
 wake_info_frame = tk.Frame(search_frame, bg=COLORS['surface'])
-wake_info_frame.pack(fill='x', padx=20, pady=5)
+wake_info_frame.pack(fill='x', padx=20, pady=3)
 
 wake_label = tk.Label(wake_info_frame, 
                      text="放下手机，享受生活！", 
@@ -356,7 +400,7 @@ wake_label.pack()
 
 # 验证输入
 verify_frame = tk.Frame(search_frame, bg=COLORS['surface'])
-verify_frame.pack(fill='x', padx=20, pady=10)
+verify_frame.pack(fill='x', padx=20, pady=8)
 
 verify_label = tk.Label(verify_frame, 
                        text="验证输入:", 
@@ -392,22 +436,22 @@ search_button.pack(side='left')
 
 # 状态栏
 status_frame = tk.Frame(main_frame, bg=COLORS['background'])
-status_frame.pack(fill='x', pady=(10, 0))
+status_frame.pack(fill='x', pady=(8, 0))
 
 status_label = tk.Label(status_frame, 
                        text="欢迎使用健康手机密码管理器", 
-                       font=('Microsoft YaHei', 9),
+                       font=('Microsoft YaHei', 8),  # 稍微减小字体
                        fg=COLORS['text_secondary'],
                        bg=COLORS['background'])
 status_label.pack()
 
 # 版权信息
 footer_frame = tk.Frame(main_frame, bg=COLORS['background'])
-footer_frame.pack(fill='x', pady=(20, 0))
+footer_frame.pack(fill='x', pady=(10, 0))
 
 footer_label = tk.Label(footer_frame, 
                        text="健康使用手机，远离数字成瘾 | © 2024", 
-                       font=('Microsoft YaHei', 8),
+                       font=('Microsoft YaHei', 7),  # 稍微减小字体
                        fg=COLORS['text_secondary'],
                        bg=COLORS['background'])
 footer_label.pack()
@@ -418,6 +462,9 @@ def on_enter_key(event):
 
 entry.bind('<Return>', on_enter_key)
 special_entry.bind('<Return>', on_enter_key)
+
+# 启动时配置滚动区域
+root.after(100, configure_scroll_region)
 
 # 运行主循环
 root.mainloop()
